@@ -3,6 +3,10 @@ package com.example.jpnfootballerlist.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import com.example.jpnfootballerlist.common.Utils;
 import com.example.jpnfootballerlist.entity.JpnFootballer;
 import com.example.jpnfootballerlist.entity.JpnFootballer_;
@@ -10,6 +14,7 @@ import com.example.jpnfootballerlist.form.JpnFootballerQuery;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -91,7 +96,7 @@ public class JpnFootballerDaoImpl implements JpnFootballerDao{
 	
 	//Criteria APIによる検索
 	@Override
-	public List<JpnFootballer> findByCriteria(JpnFootballerQuery jpnFootballerQuery){
+	public Page<JpnFootballer> findByCriteria(JpnFootballerQuery jpnFootballerQuery, Pageable pageable){
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<JpnFootballer> query = builder.createQuery(JpnFootballer.class);
 		Root<JpnFootballer> root = query.from(JpnFootballer.class);
@@ -175,10 +180,21 @@ public class JpnFootballerDaoImpl implements JpnFootballerDao{
 		predicates.toArray(predArray);
 		query = query.select(root).where(predArray).orderBy(builder.asc(root.get(JpnFootballer_.id)));
 		
+		//クエリ生成
+		TypedQuery<JpnFootballer> typedQuery = entityManager.createQuery(query);
+		//該当レコード数取得
+		int totalRows = typedQuery.getResultList().size();
+		//先頭レコードの位置設定
+		typedQuery.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
+		//１ページ当たりの件数
+		typedQuery.setMaxResults(pageable.getPageSize());
 		//検索
-		List<JpnFootballer> list = entityManager.createQuery(query).getResultList();
+		Page<JpnFootballer> page = new PageImpl<JpnFootballer>(typedQuery.getResultList(), pageable, totalRows);
 		
-		return list;
+		//検索
+		//List<JpnFootballer> list = entityManager.createQuery(query).getResultList();
+		
+		return page;
 		
 	}
 }

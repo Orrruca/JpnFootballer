@@ -1,7 +1,8 @@
 package com.example.jpnfootballerlist.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,12 +41,15 @@ public class JpnFootballerListController {
 		jpnFootballerDaoImpl = new JpnFootballerDaoImpl(entityManager);
 	}
 	
+	//JpnFootballer一覧画面
 	@GetMapping("/jpnFootballer")
-	public String showJpnFootballerList(Model model) {
+	public String showJpnFootballerList(Model model, @PageableDefault(page=0, size=10, sort="id")Pageable pageable) {
 		//一覧を検索して表示する
-		List<JpnFootballer> jpnFootballerList = jpnFootballerRepository.findAll();
-		model.addAttribute("jpnFootballerList", jpnFootballerList);
+		Page<JpnFootballer> jpnFootballerPage = jpnFootballerRepository.findAll(pageable);
 		model.addAttribute("jpnFootballerQuery", new JpnFootballerQuery());
+		model.addAttribute("jpnFootballerPage", jpnFootballerPage);
+		model.addAttribute("jpnFootballerList", jpnFootballerPage.getContent());
+		session.setAttribute("jpnFootballerQuery", new JpnFootballerQuery());
 		return "jpnFootballerList";
 	}
 	
@@ -114,8 +118,9 @@ public class JpnFootballerListController {
 	
 	//jpnFootballer一覧画面で検索ボタンがクリックされた時
 	@PostMapping("/jpnFootballer/query")
-	public String queryJpnFootballer(@ModelAttribute JpnFootballerQuery jpnFootballerQuery, BindingResult result, Model model) {
-		List<JpnFootballer> jpnFootballerList = null;
+	public String queryJpnFootballer(@ModelAttribute JpnFootballerQuery jpnFootballerQuery, BindingResult result,
+														Model model, @PageableDefault(page = 0, size = 10) Pageable pageable) {
+		Page<JpnFootballer> jpnFootballerPage = null;
 		if(jpnFootballerService.isValid(jpnFootballerQuery, result)) {
 			//エラーが無ければ検索
 			//jpnFootballerList = jpnFootballerService.doQuery(jpnFootballerQuery);
@@ -123,9 +128,33 @@ public class JpnFootballerListController {
 			//JPQLによる検索
 			//jpnFootballerList = jpnFootballerDaoImpl. findByJPQL(jpnFootballerQuery);
 			//↓Criteria APIによる検索
-			jpnFootballerList = jpnFootballerDaoImpl. findByCriteria(jpnFootballerQuery);
+			jpnFootballerPage = jpnFootballerDaoImpl. findByCriteria(jpnFootballerQuery, pageable);
+			
+			//入力された検索条件をセッションに保存
+			session.setAttribute("jpnFootballerQuery", jpnFootballerQuery);
+			
+			model.addAttribute("jpnFootballerPage", jpnFootballerPage);
+			model.addAttribute("jpnFootballerList", jpnFootballerPage.getContent());
+		} else {
+			//エラーがあった場合検索
+			model.addAttribute("jpnFootballerPage", null);
+			model.addAttribute("jpnFootballerList", null);
 		}
-		model.addAttribute("jpnFootballerList", jpnFootballerList);
+		
+		return "jpnFootballerList";
+	}
+	
+	//各ページリンクをクリックしたとき
+	@GetMapping("/jpnFootballer/query")
+	public String queryJpnFootballer(@PageableDefault(page = 0, size = 10) Pageable pageable, Model model) {
+		//セッションに保存されている条件で検索
+		JpnFootballerQuery jpnFootballerQuery = (JpnFootballerQuery)session.getAttribute("jpnFootballerQuery");
+		Page<JpnFootballer> jpnFootballerPage = jpnFootballerDaoImpl.findByCriteria(jpnFootballerQuery, pageable);
+		
+		model.addAttribute("jpnFootballerQuery", jpnFootballerQuery); //検索条件表示用
+		model.addAttribute("jpnFootballerPage", jpnFootballerPage); //page情報
+		model.addAttribute("jpnFootballerList", jpnFootballerPage.getContent()); //検索結果
+		
 		return "jpnFootballerList";
 	}
 	
