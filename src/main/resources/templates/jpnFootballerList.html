@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>JPN Footballer List</title>
+<link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<form th:action="@{/}" method="post" th:object="${jpnFootballerQuery}">
+		<div style="display: flex">
+		<table border="1">
+			<tr>
+				<th>名前</th>
+				<th>所属</th>
+				<th>年齢</th>
+				<th>生年月日</th>
+				<th>身長</th>
+				<th>ポジション</th>
+				<th>市場価値</th>
+				<th>利き足</th>
+			</tr>
+			<tr>
+				<td>
+					<input type="text" name="name" th:value="*{name}">
+				</td>
+				<td>
+					<input type="text" name="team" th:value="*{team}">
+				</td>
+				<td>
+					<input type="text" name="age" th:value="*{age}" size = "5">歳以下
+				</td>
+				<td>
+					<input type="text" name="born" th:value="*{born}" placeholder="yyyy-mm-dd">
+				</td>
+				<td>
+					<input type="text" name="heightBottom" th:value="*{heightBottom}" placeholder="最低身長" size = "5">cm
+					～
+					<input type="text" name="heightTop" th:value="*{heightTop}" placeholder="最高身長" size = "5">cm
+				</td>
+				<td>
+					<select name="position">
+						<option value="-1">選択してください</option>
+						<option value="0" th:field="*{position}">GK</option>
+						<option value="1" th:field="*{position}">DF</option>
+					 	<option value="2" th:field="*{position}">MF</option>
+						<option value="3" th:field="*{position}">FW</option>
+					</select>
+				</td>
+				<td>
+					<input type="text" name="marketValue" th:value="*{marketValue}" size = "5">
+				</td>
+				<td>
+					<input type="radio" value="0" th:field="*{foot}">左
+					<input type="radio" value="1" th:field="*{foot}">右
+				</td>
+			</tr>
+		</table>
+		<button type="submit" th:formaction="@{/jpnFootballer/query}">検索</button>
+		</div>
+		<div th:if="${#fields.hasErrors('born')}" th:errors="*{born}" th:errorclass="red"></div>
+	</form>
+	<a th:href="@{/jpnFootballer/create}">新規追加</a>
+	<table border="1">
+		<tr>
+			<th>id</th>
+			<th>名前</th>
+			<th>所属</th>
+			<th>年齢</th>
+			<th>生年月日</th>
+			<th>身長</th>
+			<th>ポジション</th>
+			<th>市場価値(万€)</th>
+			<th>利き足</th>
+		</tr>
+		<tr th:each="footballer:${jpnFootballerList}">
+			<td th:text="${footballer.id}"></td>
+			<td><a th:href="@{/jpnFootballer/__${footballer.id}__}" th:text="${footballer.name}"></a></td>
+			<td th:text="${footballer.team}"></td>
+			<td th:text="${footballer.age}" style="text-align: center;"></td>
+			<td th:text="${footballer.born}"></td>
+			<td th:text="${footballer.height}"></td>
+			<td th:switch="${footballer.position}" style="text-align: center;">
+				<span th:case="0" th:text="GK"></span>
+				<span th:case="1" th:text="DF"></span>
+				<span th:case="2" th:text="MF"></span>
+				<span th:case="3" th:text="FW"></span>
+			</td>
+			<td th:text="${footballer.marketValue}" style="text-align: center;" ></td>
+			<td th:text="${footballer.foot == 0 ? '左' : '右'}" style="text-align: center;"></td>
+		</tr>
+	</table>
+</body>
+</html>

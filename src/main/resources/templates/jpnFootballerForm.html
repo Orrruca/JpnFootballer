@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>JpnFootballer List</title>
+<link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<form th:action="@{/}" method="post" th:object="${jpnFootballerData}">
+		<table>
+			<tr>
+				<th>id</th>
+				<td>
+					<span th:text="*{id}"></span>
+					<input type="hidden" th:field="*{id}">
+				</td>
+			</tr>
+			<tr>
+				<th>名前</th>
+				<td>
+					<input type="text" name="name" th:value="*{name}">
+					<div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>所属</th>
+				<td>
+					<input type="text" name="team" th:value="*{team}">
+					<div th:if="${#fields.hasErrors('team')}" th:errors="*{team}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>年齢</th>
+				<td>
+					<input type="text" name="age" th:value="*{age}">
+					<div th:if="${#fields.hasErrors('age')}" th:errors="*{age}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>生年月日</th>
+				<td>
+					<input type="text" name="born" th:value="*{born}" placeholder="yyyy-mm-dd">
+					<div th:if="${#fields.hasErrors('born')}" th:errors="*{born}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>身長</th>
+				<td>
+					<input type="text" name="height" th:value="*{height}">
+					<div th:if="${#fields.hasErrors('height')}" th:errors="*{height}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>ポジション</th>
+				<td>
+					<select name="position">
+						<option value="">選択してください</option>
+						<option value="0" th:field="*{position}">GK</option>
+						<option value="1" th:field="*{position}">DF</option>
+						<option value="2" th:field="*{position}">MF</option>
+						<option value="3" th:field="*{position}">FW</option>
+					</select>
+					<div th:if="${#fields.hasErrors('position')}" th:errors="*{position}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>市場価値</th>
+				<td>
+					<input type="text" name="marketValue" th:value="*{marketValue}">
+					<div th:if="${#fields.hasErrors('marketValue')}" th:errors="*{marketValue}" th:errorclass="red"></div>
+				</td>
+			</tr>
+			<tr>
+				<th>利き足</th>
+				<td>
+					<input type="radio" value="0" th:field="*{foot}">左
+					<input type="radio" value="1" th:field="*{foot}">右
+					<div th:if="${#fields.hasErrors('foot')}" th:errors="*{foot}" th:errorclass="red"></div>
+				</td>
+			</tr>
+		</table>
+		<div th:if="${session.mode == 'update'}">
+			<button type="submit" th:formaction="@{/jpnFootballer/update}">更新</button>
+			<button type="submit" th:formaction="@{/jpnFootballer/delete}">削除</button>
+			<button type="submit" th:formaction="@{/jpnFootballer/cancel}">キャンセル</button>
+		</div>
+		<div th:unless="${session.mode == 'update'}">
+			<button type="submit" th:formaction="@{/jpnFootballer/create}">登録</button>
+			<button type="submit" th:formaction="@{/jpnFootballer/cancel}">キャンセル</button>
+		</div>
+	</form>
+</body>
+</html>
